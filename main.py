@@ -8,6 +8,36 @@ from selenium.webdriver.support import expected_conditions as EC
 from datetime import datetime
 import time
 
+# 🆕 IMPORTS DO CALENDÁRIO
+import tkinter as tk
+from tkinter import ttk
+from tkcalendar import Calendar
+
+
+# =========================
+# CALENDÁRIO DE DATA
+# =========================
+def escolher_data():
+    data_escolhida = []
+
+    def pegar_data():
+        data_escolhida.append(cal.get_date())
+        janela.destroy()
+
+    janela = tk.Tk()
+    janela.title("Selecione a Data")
+    janela.geometry("300x300")
+
+    cal = Calendar(janela, selectmode='day', date_pattern='dd/mm/yyyy')
+    cal.pack(pady=20)
+
+    btn = ttk.Button(janela, text="Confirmar", command=pegar_data)
+    btn.pack()
+
+    janela.mainloop()
+
+    return data_escolhida[0]
+
 
 # =========================
 # FUNÇÃO REUTILIZÁVEL
@@ -73,8 +103,13 @@ def rodar_automacao():
         botao_agendas = wait.until(EC.element_to_be_clickable((By.XPATH, xpath_menu_agendas)))
         driver.execute_script("arguments[0].click();", botao_agendas)
 
-        # FILTRO DE DATA
-        hoje = datetime.today().strftime("%Y-%m-%d")
+        # =========================
+        # 🆕 FILTRO DE DATA (COM CALENDÁRIO)
+        # =========================
+        entrada = escolher_data()
+
+        data_obj = datetime.strptime(entrada, "%d/%m/%Y")
+        hoje = data_obj.strftime("%Y-%m-%d")
 
         campo_data_inicio = wait.until(EC.presence_of_element_located((By.ID, "data_inicio")))
         driver.execute_script("arguments[0].value = arguments[1];", campo_data_inicio, hoje)
@@ -139,7 +174,7 @@ def rodar_automacao():
 
         preencher_item(driver, wait, 3, "13:00", "18:00", "segundo periodo")
 
-        # SALVAR (Dentro do escopo da função e do try)
+        # SALVAR
         botao_salvar = wait.until(
             EC.element_to_be_clickable((By.ID, "btn-salvar-lancamento"))
         )
