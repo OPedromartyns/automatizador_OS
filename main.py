@@ -14,9 +14,9 @@ from tkinter import ttk
 from tkcalendar import Calendar
 
 
-# =========================
+
 # CALENDÁRIO DE DATA
-# =========================
+
 def escolher_data():
     data_escolhida = []
 
@@ -39,9 +39,8 @@ def escolher_data():
     return data_escolhida[0]
 
 
-# =========================
 # FUNÇÃO REUTILIZÁVEL
-# =========================
+
 def preencher_item(driver, wait, num, inicio, fim, desc):
     Select(wait.until(EC.presence_of_element_located(
         (By.NAME, f"tipo_tarefa_{num:03d}")
@@ -76,9 +75,9 @@ def preencher_item(driver, wait, num, inicio, fim, desc):
     )
 
 
-# =========================
+
 # AUTOMAÇÃO PRINCIPAL
-# =========================
+
 def rodar_automacao():
     chrome_options = Options()
     chrome_options.add_experimental_option("detach", True)
@@ -94,8 +93,8 @@ def rodar_automacao():
         driver.get("https://agenda.fabritech.com.br/login/")
         driver.maximize_window()
 
-        wait.until(EC.presence_of_element_located((By.ID, "id_username"))).send_keys("MATHEUS.FELIPE")
-        wait.until(EC.presence_of_element_located((By.ID, "id_password"))).send_keys("Mv09112019@")
+        wait.until(EC.presence_of_element_located((By.ID, "id_username"))).send_keys("PEDRO.MARTINS")
+        wait.until(EC.presence_of_element_located((By.ID, "id_password"))).send_keys("123456")
         wait.until(EC.element_to_be_clickable((By.ID, "loginBtn"))).click()
 
         # MENU
@@ -103,9 +102,9 @@ def rodar_automacao():
         botao_agendas = wait.until(EC.element_to_be_clickable((By.XPATH, xpath_menu_agendas)))
         driver.execute_script("arguments[0].click();", botao_agendas)
 
-        # =========================
-        # 🆕 FILTRO DE DATA (COM CALENDÁRIO)
-        # =========================
+        
+        # FILTRO DE DATA (COM CALENDÁRIO)
+        
         entrada = escolher_data()
 
         data_obj = datetime.strptime(entrada, "%d/%m/%Y")
