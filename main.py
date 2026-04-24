@@ -94,8 +94,8 @@ def rodar_automacao():
         driver.get("https://agenda.fabritech.com.br/login/")
         driver.maximize_window()
 
-        wait.until(EC.presence_of_element_located((By.ID, "id_username"))).send_keys("PEDRO.MARTINS")
-        wait.until(EC.presence_of_element_located((By.ID, "id_password"))).send_keys("123456@Pp")
+        wait.until(EC.presence_of_element_located((By.ID, "id_username"))).send_keys("MATHEUS.FELIPE")
+        wait.until(EC.presence_of_element_located((By.ID, "id_password"))).send_keys("Mv09112019@")
         wait.until(EC.element_to_be_clickable((By.ID, "loginBtn"))).click()
 
         # MENU
@@ -162,7 +162,7 @@ def rodar_automacao():
         )).select_by_value(tipo)
 
         # ITENS
-        preencher_item(driver, wait, 1, "08:00", "12:00", "primeiro período")
+        preencher_item(driver, wait, 1, "08:00", "12:00", "primeiro turno")
 
         botao_add_item = wait.until(EC.element_to_be_clickable((By.ID, "btn-add-item")))
         driver.execute_script("arguments[0].click();", botao_add_item)
@@ -172,14 +172,17 @@ def rodar_automacao():
         botao_add_item_2 = wait.until(EC.element_to_be_clickable((By.ID, "btn-add-item")))
         driver.execute_script("arguments[0].click();", botao_add_item_2)
 
-        preencher_item(driver, wait, 3, "13:00", "18:00", "segundo periodo")
+        preencher_item(driver, wait, 3, "13:00", "18:00", "segundo turno")
 
         # SALVAR
         botao_salvar = wait.until(
             EC.element_to_be_clickable((By.ID, "btn-salvar-lancamento"))
         )
         driver.execute_script("arguments[0].click();", botao_salvar)
-
+    
+        botao_agendas = wait.until(EC.element_to_be_clickable((By.XPATH, xpath_menu_agendas)))
+        driver.execute_script("arguments[0].click();", botao_agendas)
+    
     except Exception as e:
         print(f"Erro: {e}")
 
