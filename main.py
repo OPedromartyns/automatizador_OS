@@ -94,7 +94,7 @@ def rodar_automacao():
         driver.maximize_window()
 
         wait.until(EC.presence_of_element_located((By.ID, "id_username"))).send_keys("PEDRO.MARTINS")
-        wait.until(EC.presence_of_element_located((By.ID, "id_password"))).send_keys("123456")
+        wait.until(EC.presence_of_element_located((By.ID, "id_password"))).send_keys("123456@Pp")
         wait.until(EC.element_to_be_clickable((By.ID, "loginBtn"))).click()
 
         # MENU
