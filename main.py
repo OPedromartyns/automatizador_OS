@@ -8,14 +8,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from datetime import datetime
 import time
 
-# 🆕 IMPORTS DO CALENDÁRIO
 import tkinter as tk
 from tkinter import ttk
 from tkcalendar import Calendar
 
 
-
-# CALENDÁRIO DE DATA
+# ---------------- CALENDÁRIO ----------------
 
 def escolher_data():
     data_escolhida = []
@@ -24,22 +22,36 @@ def escolher_data():
         data_escolhida.append(cal.get_date())
         janela.destroy()
 
-    janela = tk.Tk()
-    janela.title("Selecione a Data")
-    janela.geometry("300x300")
+    def fechar():
+        janela.destroy()
 
-    cal = Calendar(janela, selectmode='day', date_pattern='dd/mm/yyyy')
+    janela = tk.Tk()
+    janela.title("Selecionar OS")
+    janela.geometry("350x350")
+
+    tk.Label(
+        janela,
+        text="Selecionar OS",
+        font=("Arial", 14, "bold")
+    ).pack(pady=10)
+
+    cal = Calendar(
+        janela,
+        selectmode='day',
+        date_pattern='dd/mm/yyyy'
+    )
     cal.pack(pady=20)
 
-    btn = ttk.Button(janela, text="Confirmar", command=pegar_data)
+    btn = ttk.Button(janela, text="Lançar OS", command=pegar_data)
     btn.pack()
 
+    janela.protocol("WM_DELETE_WINDOW", fechar)
     janela.mainloop()
 
-    return data_escolhida[0]
+    return data_escolhida[0] if data_escolhida else None
 
 
-# FUNÇÃO REUTILIZÁVEL
+# ---------------- FUNÇÃO ITEM ----------------
 
 def preencher_item(driver, wait, num, inicio, fim, desc):
     Select(wait.until(EC.presence_of_element_located(
@@ -75,8 +87,7 @@ def preencher_item(driver, wait, num, inicio, fim, desc):
     )
 
 
-
-# AUTOMAÇÃO PRINCIPAL
+# ---------------- AUTOMAÇÃO ----------------
 
 def rodar_automacao():
     chrome_options = Options()
@@ -85,10 +96,9 @@ def rodar_automacao():
 
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
+    wait = WebDriverWait(driver, 15)
 
     try:
-        wait = WebDriverWait(driver, 15)
-
         # LOGIN
         driver.get("https://agenda.fabritech.com.br/login/")
         driver.maximize_window()
@@ -97,93 +107,134 @@ def rodar_automacao():
         wait.until(EC.presence_of_element_located((By.ID, "id_password"))).send_keys("123456@Pp")
         wait.until(EC.element_to_be_clickable((By.ID, "loginBtn"))).click()
 
-        # MENU
         xpath_menu_agendas = "/html/body/main/div/aside/nav/div[1]/a"
-        botao_agendas = wait.until(EC.element_to_be_clickable((By.XPATH, xpath_menu_agendas)))
-        driver.execute_script("arguments[0].click();", botao_agendas)
 
-        
-        # FILTRO DE DATA (COM CALENDÁRIO)
-        
-        entrada = escolher_data()
+        while True:
+            entrada = escolher_data()
 
-        data_obj = datetime.strptime(entrada, "%d/%m/%Y")
-        hoje = data_obj.strftime("%Y-%m-%d")
+            if entrada is None:
+                print("Encerrado pelo usuário.")
+                break
 
-        campo_data_inicio = wait.until(EC.presence_of_element_located((By.ID, "data_inicio")))
-        driver.execute_script("arguments[0].value = arguments[1];", campo_data_inicio, hoje)
-        campo_data_inicio.send_keys("\t")
+            # Só clica se não estiver na tela agendas
+            if "agendas" not in driver.current_url.lower():
+                botao_agendas = wait.until(
+                    EC.element_to_be_clickable((By.XPATH, xpath_menu_agendas))
+                )
+                driver.execute_script("arguments[0].click();", botao_agendas)
 
-        campo_data_fim = wait.until(EC.presence_of_element_located((By.ID, "data_fim")))
-        driver.execute_script("arguments[0].value = arguments[1];", campo_data_fim, hoje)
-        campo_data_fim.send_keys("\t")
+            hoje = datetime.strptime(entrada, "%d/%m/%Y").strftime("%Y-%m-%d")
 
-        time.sleep(1)
+            campo_data_inicio = wait.until(
+                EC.presence_of_element_located((By.ID, "data_inicio"))
+            )
+            driver.execute_script(
+                "arguments[0].value = arguments[1];",
+                campo_data_inicio,
+                hoje
+            )
 
-        # BUSCAR
-        xpath_buscar = '//*[@id="form-filtro-agendas"]/div[2]/div[3]/button'
-        botao_buscar = wait.until(EC.element_to_be_clickable((By.XPATH, xpath_buscar)))
-        driver.execute_script("arguments[0].click();", botao_buscar)
+            campo_data_fim = wait.until(
+                EC.presence_of_element_located((By.ID, "data_fim"))
+            )
+            driver.execute_script(
+                "arguments[0].value = arguments[1];",
+                campo_data_fim,
+                hoje
+            )
 
-        # AÇÕES
-        botao_acoes = wait.until(EC.element_to_be_clickable(
-            (By.XPATH, "//button[contains(@class,'btn-actions')]")
-        ))
-        driver.execute_script("arguments[0].click();", botao_acoes)
+            # BUSCAR
+            botao_buscar = wait.until(
+                EC.element_to_be_clickable(
+                    (By.XPATH, '//*[@id="form-filtro-agendas"]/div[2]/div[3]/button')
+                )
+            )
+            driver.execute_script("arguments[0].click();", botao_buscar)
 
-        wait.until(EC.visibility_of_element_located(
-            (By.XPATH, "//div[contains(@class,'dropdown-menu')]")
-        ))
+            # AÇÕES
+            botao_acoes = wait.until(
+                EC.element_to_be_clickable(
+                    (By.XPATH, "//button[contains(@class,'btn-actions')]")
+                )
+            )
+            driver.execute_script("arguments[0].click();", botao_acoes)
 
-        # LANÇAR OS
-        botao_lancar = wait.until(EC.element_to_be_clickable(
-            (By.XPATH, "//div[contains(@class,'dropdown-menu')]//button[@type='submit']")
-        ))
-        driver.execute_script("arguments[0].click();", botao_lancar)
+            # LANÇAR
+            botao_lancar = wait.until(
+                EC.element_to_be_clickable(
+                    (By.XPATH, "//div[contains(@class,'dropdown-menu')]//button[@type='submit']")
+                )
+            )
+            driver.execute_script("arguments[0].click();", botao_lancar)
 
-        # HORAS OS
-        driver.execute_script("arguments[0].value = '08:00';",
-            wait.until(EC.visibility_of_element_located((By.ID, "hora_inicio_os")))
-        )
+            # HORÁRIOS
+            driver.execute_script(
+                "arguments[0].value = '08:00';",
+                wait.until(EC.visibility_of_element_located((By.ID, "hora_inicio_os")))
+            )
 
-        driver.execute_script("arguments[0].value = '18:00';",
-            wait.until(EC.visibility_of_element_located((By.ID, "hora_fim_os")))
-        )
+            driver.execute_script(
+                "arguments[0].value = '18:00';",
+                wait.until(EC.visibility_of_element_located((By.ID, "hora_fim_os")))
+            )
 
-        # TIPO ATENDIMENTO
-        campo_data = wait.until(EC.presence_of_element_located((By.NAME, "data_os")))
-        data_obj = datetime.strptime(campo_data.get_attribute("value"), "%d/%m/%Y")
+            # PRESENCIAL / REMOTO
+            campo_data = wait.until(
+                EC.presence_of_element_located((By.NAME, "data_os"))
+            )
 
-        tipo = "P" if data_obj.weekday() in (0, 3) else "R"
+            data_obj = datetime.strptime(
+                campo_data.get_attribute("value"),
+                "%d/%m/%Y"
+            )
 
-        Select(wait.until(
-            EC.presence_of_element_located((By.NAME, "tipo_atendimento_os"))
-        )).select_by_value(tipo)
+            tipo = "P" if data_obj.weekday() in (0, 3) else "R"
 
-        # ITENS
-        preencher_item(driver, wait, 1, "08:00", "12:00", "primeiro turno")
+            Select(
+                wait.until(
+                    EC.presence_of_element_located(
+                        (By.NAME, "tipo_atendimento_os")
+                    )
+                )
+            ).select_by_value(tipo)
 
-        botao_add_item = wait.until(EC.element_to_be_clickable((By.ID, "btn-add-item")))
-        driver.execute_script("arguments[0].click();", botao_add_item)
+            # ITENS
+            preencher_item(driver, wait, 1, "08:00", "12:00", "primeiro turno")
 
-        preencher_item(driver, wait, 2, "12:00", "13:00", "Intervalo")
+            wait.until(
+                EC.element_to_be_clickable((By.ID, "btn-add-item"))
+            ).click()
 
-        botao_add_item_2 = wait.until(EC.element_to_be_clickable((By.ID, "btn-add-item")))
-        driver.execute_script("arguments[0].click();", botao_add_item_2)
+            preencher_item(driver, wait, 2, "12:00", "13:00", "Intervalo")
 
-        preencher_item(driver, wait, 3, "13:00", "18:00", "segundo turno")
+            wait.until(
+                EC.element_to_be_clickable((By.ID, "btn-add-item"))
+            ).click()
 
-        # SALVAR
-        botao_salvar = wait.until(
-            EC.element_to_be_clickable((By.ID, "btn-salvar-lancamento"))
-        )
-        driver.execute_script("arguments[0].click();", botao_salvar)
-    
-        botao_agendas = wait.until(EC.element_to_be_clickable((By.XPATH, xpath_menu_agendas)))
-        driver.execute_script("arguments[0].click();", botao_agendas)
-    
+            preencher_item(driver, wait, 3, "13:00", "18:00", "segundo turno")
+
+            # SALVAR
+            botao_salvar = wait.until(
+                EC.element_to_be_clickable((By.ID, "btn-salvar-lancamento"))
+            )
+            driver.execute_script("arguments[0].click();", botao_salvar)
+
+            print(f"OS lançada para {entrada} | Tipo: {'Presencial' if tipo == 'P' else 'Remoto'}")
+
+            # Espera salvar
+            time.sleep(3)
+
+            # Volta para agenda
+            botao_agendas = wait.until(
+                EC.element_to_be_clickable((By.XPATH, xpath_menu_agendas))
+            )
+            driver.execute_script("arguments[0].click();", botao_agendas)
+
+            time.sleep(2)
+
     except Exception as e:
         print(f"Erro: {e}")
+
 
 if __name__ == "__main__":
     rodar_automacao()
