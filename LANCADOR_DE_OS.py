@@ -117,13 +117,13 @@ def rodar_automacao():
             EC.presence_of_element_located(
                 (By.ID, "id_username")
             )
-        ).send_keys("xxxxxxxxxx")
+        ).send_keys("USUARIO")
 
         wait.until(
             EC.presence_of_element_located(
                 (By.ID, "id_password")
             )
-        ).send_keys("xxxxxxxxxxx")
+        ).send_keys("SENHA")
 
         wait.until(
             EC.element_to_be_clickable(

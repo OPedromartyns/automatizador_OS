@@ -1,48 +1,312 @@
-# 📌 Automação Selenium – Lançamento de OS
+# 📌 Manual de Configuração da Automação de Lançamento de OS
 
-## Este projeto automatiza o processo de login e lançamento de Ordens de Serviço (OS) no sistema da agenda, utilizando Selenium WebDriver.
+## 📖 Objetivo
+
+Esta automação realiza automaticamente o lançamento de Ordens de Serviço (OS) no sistema Agenda.
+
+Ela foi desenvolvida para reduzir o preenchimento manual e permitir ajustes simples por futuros analistas.
+
+As alterações permitidas são:
+
+- Alteração de usuário
+- Alteração de senha
+- Alteração dos dias presenciais
+- Geração de novo executável
 
 ---
 
-# 🔐 1. Login no Sistema
+# 🛠 Requisitos
 
-## O acesso ao sistema é feito automaticamente pelo script através dos campos de autenticação.
+Antes de utilizar a automação, é necessário possuir:
 
-## 📍 Código responsável:
+- Python instalado
+- Visual Studio Code
+- Google Chrome
+- Conexão com internet
 
-![alt text](image.png)
-⚠️ Observação:
+---
 
-## Essa regra precisa ser ajustada conforme o usuario digitando usuario e senha  ela pode ser alterada diretamente no código:
+# 📥 Instalação das Dependências
 
-## 🧠 Como funciona:
-## O campo id_username recebe o nome de usuário do sistema
-## O campo id_password recebe a senha de acesso
-## O método send_keys() simula a digitação automática no navegador
-# ⚠️ Importante:
+Abra o terminal no VS Code e execute:
 
-## As credenciais estão fixas no código e devem ser alteradas conforme o usuário que for executar a automação
+```bash
+pip install selenium webdriver-manager tkcalendar pyinstaller
+```
 
-# 📅 2. Regra de Dias Presenciais (Tipo de Atendimento)
+---
 
-## O sistema define automaticamente o tipo de atendimento como Presencial (P) ou Remoto (R) com base no dia da semana da OS.
+# 🔐 Alteração de Usuário e Senha
 
-# 📍 Trecho do código:
-![alt text](image-1.png)
+Sempre que houver troca de credenciais, localizar o trecho:
 
-# 🧠 Como funciona:
+```python
+wait.until(EC.presence_of_element_located((By.ID, "id_username"))).send_keys("USUARIO")
+wait.until(EC.presence_of_element_located((By.ID, "id_password"))).send_keys("SENHA")
+```
 
-## O método weekday() retorna o dia da semana em formato numérico:
+## Alterar usuário
 
-| Dia da semana | weekday() |
-| ------------- | --------- |
-| Segunda-feira | 0         |
-| Terça-feira   | 1         |
-| Quarta-feira  | 2         |
-| Quinta-feira  | 3         |
-| Sexta-feira   | 4         |
-# 📊 Regra atual:
-## Se weekday() for 0 ou 3 → Presencial (P) Caso contrário → Remoto (R)
-# ⚠️ Observação:
+Substituir:
 
-## Essa regra precisa ser ajustado  conforme o usuario . Caso necessário, ela pode ser alterada diretamente no código:
+```python
+"USUARIO"
+```
+
+Exemplo:
+
+```python
+"joao.silva"
+```
+
+---
+
+## Alterar senha
+
+Substituir:
+
+```python
+"SENHA"
+```
+
+Exemplo:
+
+```python
+"Senha@123"
+```
+
+---
+
+## ⚠️ Cuidados
+
+**Nunca remover:**
+
+- Aspas
+- Parênteses
+- `.send_keys`
+
+✅ Correto
+
+```python
+send_keys("joao.silva")
+```
+
+❌ Incorreto
+
+```python
+send_keys(joao.silva)
+```
+
+---
+
+# 📅 Alteração dos Dias Presenciais
+
+Localizar o trecho:
+
+```python
+tipo = "P" if data_obj.weekday() in (0, 3) else "R"
+```
+
+---
+
+## Tabela de dias
+
+| Dia | Número |
+|-----|--------|
+| Segunda | 0 |
+| Terça | 1 |
+| Quarta | 2 |
+| Quinta | 3 |
+| Sexta | 4 |
+
+---
+
+## Configuração atual
+
+Presencial em:
+
+- Segunda
+- Quinta
+
+Código:
+
+```python
+(0, 3)
+```
+
+---
+
+## Exemplos
+
+### Presencial terça e quinta
+
+```python
+tipo = "P" if data_obj.weekday() in (1, 3) else "R"
+```
+
+---
+
+### Presencial somente quarta
+
+```python
+tipo = "P" if data_obj.weekday() == 2 else "R"
+```
+
+---
+
+### Presencial segunda, quarta e sexta
+
+```python
+tipo = "P" if data_obj.weekday() in (0, 2, 4) else "R"
+```
+
+---
+
+
+
+## Função de preenchimento
+
+```python
+preencher_item()
+```
+
+---
+
+## Loop principal
+
+```python
+while True:
+```
+
+---
+
+## Seletores
+
+```python
+By.ID
+By.XPATH
+By.NAME
+```
+
+---
+
+# ▶️ Executar no VS Code
+
+No terminal do VS Code:
+
+```bash
+python main.py
+```
+
+---
+
+# ⚙️ Gerar Executável (.exe)
+
+Sempre que houver alteração no código, é necessário gerar um novo executável.
+
+---
+
+## Passo 1 — Abrir terminal no VS Code
+
+No menu superior:
+
+**Terminal → Novo Terminal**
+
+---
+
+## Passo 2 — Navegar até a pasta do projeto
+
+Exemplo:
+
+```bash
+cd C:\Users\SeuUsuario\Documents\automatizador_OS
+```
+
+---
+
+## Passo 3 — Gerar o executável
+
+Executar:
+
+```bash
+python -m PyInstaller --onefile --noconsole --collect-all selenium --hidden-import=tkcalendar main.py
+```
+
+---
+
+## Passo 4 — Localizar o executável
+
+Após finalizar, o arquivo será criado em:
+
+```bash
+dist/
+```
+
+Exemplo:
+
+```bash
+dist/main.exe
+```
+
+---
+
+# 🔄 Sempre que alterar
+
+Após mudar:
+
+- Usuário
+- Senha
+- Dias presenciais
+
+É obrigatório gerar novamente o executável.
+
+---
+
+# ⚠️ Em caso de erro na geração
+
+Se aparecer erro de dependência, executar:
+
+```bash
+pip install --upgrade pyinstaller
+```
+
+Se persistir:
+
+```bash
+pip install selenium webdriver-manager tkcalendar pyinstaller
+```
+
+---
+
+# 🧪 Teste após gerar
+
+Executar o `.exe`
+
+Validar:
+
+- Login realizado
+- Calendário abre
+- Busca agenda
+- Lançamento ocorre normalmente
+
+---
+
+# 📞 Suporte Técnico
+
+Caso a automação pare de funcionar sem alterações realizadas, o problema pode estar relacionado a:
+
+- Mudança no sistema Agenda
+- Alteração de campos HTML
+- Mudança de seletores Selenium
+
+Nestes casos será necessária manutenção técnica no código.
+
+---🔧 Melhorias Futuras
+
+Sugestões de evolução:
+
+Tela para digitação de login/senha
+Arquivo de configuração
+Logs em arquivo
+Interface gráfica completa
+Geração de executável
