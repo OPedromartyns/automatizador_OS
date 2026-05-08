@@ -289,3 +289,4 @@ def rodar_automacao():
 
 if __name__ == "__main__":
     rodar_automacao()
+    # by Pedro H Martins
